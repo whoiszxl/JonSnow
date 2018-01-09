@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.whoiszxl.seckill.dao.UserDao;
 import com.whoiszxl.seckill.entities.User;
+import com.whoiszxl.seckill.redis.RedisService;
+import com.whoiszxl.seckill.redis.UserKey;
 import com.whoiszxl.seckill.result.CodeMessage;
 import com.whoiszxl.seckill.result.Result;
 import com.whoiszxl.seckill.service.IUserService;
@@ -21,6 +23,9 @@ import com.whoiszxl.seckill.service.IUserService;
 @Controller
 @RequestMapping(value = "/my")
 public class MyController {
+	
+	@Autowired
+	private RedisService redisService;
 	
 	@Autowired
 	private IUserService userService;
@@ -59,4 +64,21 @@ public class MyController {
     	userService.tx();
         return Result.success(true);
     }
+	
+	@RequestMapping("/redis/get")
+	@ResponseBody
+	public Result<User> redisGet(){
+		User user = redisService.get(UserKey.USER_INFO, "1", User.class);
+		return Result.success(user);
+	}
+	
+	@RequestMapping("/redis/set")
+	@ResponseBody
+	public Result<String> redisSet(){
+		User user = new User();
+		user.setUsername("wangfei");
+		user.setPassword("wangfeifei");
+		redisService.set(UserKey.USER_INFO, "1", user);
+		return Result.success("redis key设置成功");
+	}
 }
