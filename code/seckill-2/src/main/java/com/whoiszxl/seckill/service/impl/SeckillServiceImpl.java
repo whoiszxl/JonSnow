@@ -1,13 +1,18 @@
 package com.whoiszxl.seckill.service.impl;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.whoiszxl.seckill.dao.SeckillUserDao;
 import com.whoiszxl.seckill.entities.SeckillUser;
 import com.whoiszxl.seckill.execption.GlobalException;
+import com.whoiszxl.seckill.redis.RedisService;
+import com.whoiszxl.seckill.redis.SeckillUserKey;
 import com.whoiszxl.seckill.result.CodeMessage;
 import com.whoiszxl.seckill.service.ISeckillService;
 import com.whoiszxl.seckill.utils.MD5Util;
@@ -18,8 +23,39 @@ import com.whoiszxl.seckill.vo.RegisterVo;
 @Service
 public class SeckillServiceImpl implements ISeckillService {
 
+	@Value("${my.cookie.token}")
+	public String COOKIE_NAME_TOKEN;
 	@Autowired
 	private SeckillUserDao seckillUserDao;
+	
+	@Autowired
+	private RedisService redisService;
+	
+	public SeckillUser getByToken(HttpServletResponse response, String token) {
+		if(StringUtils.isEmpty(token)) {
+			return null;
+		}	
+		SeckillUser user = redisService.get(SeckillUserKey.token, token, SeckillUser.class);
+		//获取之前判断是否存在,存在则续点时间
+		if(user != null) {
+			addCookie(response, token, user);
+		}
+		return user;
+	}
+	
+	/**
+	 * 将token存入redis并且还存入cookie
+	 * @param response
+	 * @param token
+	 * @param user
+	 */
+	private void addCookie(HttpServletResponse response, String token, SeckillUser user) {
+		redisService.set(SeckillUserKey.token, token, user);
+		Cookie cookie = new Cookie(COOKIE_NAME_TOKEN, token);
+		cookie.setMaxAge(SeckillUserKey.token.expireSeconds());
+		cookie.setPath("/");
+		response.addCookie(cookie);
+	}
 
 	@Override
 	public SeckillUser getById(long id) {
@@ -48,7 +84,10 @@ public class SeckillServiceImpl implements ISeckillService {
 			// 不相等抛出异常
 			throw new GlobalException(CodeMessage.PASSWORD_ERROR);
 		}
-
+		
+		//登录后存入cookie
+		String token = UUIDUtil.uuid();
+		addCookie(response, token, user);
 		return true;
 	}
 

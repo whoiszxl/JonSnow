@@ -31,4 +31,12 @@ public interface ISeckillService {
 	 * @return
 	 */
 	public int register(HttpServletResponse response, RegisterVo registerVo);
+	
+	/**
+	 * 通过token获取到当前登录的user
+	 * @param response
+	 * @param token
+	 * @return
+	 */
+	public SeckillUser getByToken(HttpServletResponse response, String token);
 }
