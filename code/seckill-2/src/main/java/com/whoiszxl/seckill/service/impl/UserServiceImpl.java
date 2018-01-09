@@ -1,4 +1,4 @@
-package com.whoiszxl.seckill.service;
+package com.whoiszxl.seckill.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.whoiszxl.seckill.dao.UserDao;
 import com.whoiszxl.seckill.entities.User;
+import com.whoiszxl.seckill.service.IUserService;
 
 @Service
 public class UserServiceImpl implements IUserService{
