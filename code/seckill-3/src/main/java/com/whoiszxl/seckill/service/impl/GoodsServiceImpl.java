@@ -19,6 +19,11 @@ public class GoodsServiceImpl implements IGoodsService {
 	public List<GoodsVo> listGoodsVo() {
 		return goodsDao.listGoodsVo();
 	}
+
+	@Override
+	public GoodsVo getGoodsVoByGoodsId(long goodsId) {
+		return goodsDao.getGoodsVoByGoodsId(goodsId);
+	}
 	
 	
 }
