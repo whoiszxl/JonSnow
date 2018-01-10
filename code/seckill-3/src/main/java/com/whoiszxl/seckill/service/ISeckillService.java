@@ -2,7 +2,9 @@ package com.whoiszxl.seckill.service;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.whoiszxl.seckill.entities.OrderInfo;
 import com.whoiszxl.seckill.entities.SeckillUser;
+import com.whoiszxl.seckill.vo.GoodsVo;
 import com.whoiszxl.seckill.vo.LoginVo;
 import com.whoiszxl.seckill.vo.RegisterVo;
 
@@ -39,4 +41,6 @@ public interface ISeckillService {
 	 * @return
 	 */
 	public SeckillUser getByToken(HttpServletResponse response, String token);
+
+	public OrderInfo seckill(SeckillUser user, GoodsVo goods);
 }

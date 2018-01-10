@@ -7,16 +7,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.whoiszxl.seckill.dao.SeckillUserDao;
+import com.whoiszxl.seckill.entities.OrderInfo;
 import com.whoiszxl.seckill.entities.SeckillUser;
 import com.whoiszxl.seckill.execption.GlobalException;
 import com.whoiszxl.seckill.redis.RedisService;
 import com.whoiszxl.seckill.redis.SeckillUserKey;
 import com.whoiszxl.seckill.result.CodeMessage;
+import com.whoiszxl.seckill.service.IGoodsService;
+import com.whoiszxl.seckill.service.IOrderService;
 import com.whoiszxl.seckill.service.ISeckillService;
 import com.whoiszxl.seckill.utils.MD5Util;
 import com.whoiszxl.seckill.utils.UUIDUtil;
+import com.whoiszxl.seckill.vo.GoodsVo;
 import com.whoiszxl.seckill.vo.LoginVo;
 import com.whoiszxl.seckill.vo.RegisterVo;
 
@@ -30,6 +35,21 @@ public class SeckillServiceImpl implements ISeckillService {
 	
 	@Autowired
 	private RedisService redisService;
+	
+	@Autowired
+	private IOrderService orderService;
+	
+	@Autowired
+	private IGoodsService goodsService;
+	
+	@Transactional
+	public OrderInfo seckill(SeckillUser user, GoodsVo goods) {
+		//减库存 下订单 写入秒杀订单
+		goodsService.reduceStock(goods);
+		//order_info
+		return orderService.createOrder(user, goods);
+	}
+	
 	
 	public SeckillUser getByToken(HttpServletResponse response, String token) {
 		if(StringUtils.isEmpty(token)) {
