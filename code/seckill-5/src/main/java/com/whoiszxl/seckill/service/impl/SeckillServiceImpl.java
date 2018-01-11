@@ -79,7 +79,17 @@ public class SeckillServiceImpl implements ISeckillService {
 
 	@Override
 	public SeckillUser getById(long id) {
-		return seckillUserDao.getById(id);
+		//去缓存
+		SeckillUser user = redisService.get(SeckillUserKey.getById, ""+id, SeckillUser.class);
+		if(user != null) {
+			return user;
+		}
+		//缓存拿不到去数据库
+		user = seckillUserDao.getById(id);
+		if(user != null) {
+			redisService.set(SeckillUserKey.getById, ""+id, user);
+		}
+		return user;
 	}
 
 	@Override
